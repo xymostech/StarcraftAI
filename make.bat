@@ -1,6 +1,6 @@
 @echo off
 
-set prodname=BasicAI
+set prodname=StarcraftAI
 
 del /Q Products\*
 

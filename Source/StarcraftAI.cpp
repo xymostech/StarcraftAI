@@ -1,10 +1,10 @@
 
-#include "BasicAI.h"
+#include "StarcraftAI.h"
 using namespace BWAPI;
 
 bool analyzed;
 
-void BasicAI::onStart()
+void StarcraftAI::onStart()
 {
 	BWTA::readMap();
 	analyzed = false;
@@ -23,12 +23,12 @@ void BasicAI::onStart()
 	past_supply = Broodwar->self()->supplyTotal();
 }
 
-void BasicAI::onEnd(bool isWinner)
+void StarcraftAI::onEnd(bool isWinner)
 {
 	
 }
 
-void BasicAI::onFrame() {
+void StarcraftAI::onFrame() {
  	updateSupply();
 	
 	if ( analyzed ) {
@@ -80,7 +80,7 @@ void BasicAI::onFrame() {
 	drawTerrainData();
 }
 
-void BasicAI::onUnitMorph(BWAPI::Unit* unit) {
+void StarcraftAI::onUnitMorph(BWAPI::Unit* unit) {
 	if ( unit->getType() == UnitTypes::Zerg_Overlord ) {
 		overlords_building -= 1;
 		overlords_finished += 1;
@@ -95,14 +95,14 @@ void BasicAI::onUnitMorph(BWAPI::Unit* unit) {
 	}
 }
 
-void BasicAI::onUnitDestroy(BWAPI::Unit* unit)
+void StarcraftAI::onUnitDestroy(BWAPI::Unit* unit)
 {
 	if ( unit->getType() == UnitTypes::Zerg_Overlord ) {
 		overlords_destroyed += 1;
 	}
 }
 
-void BasicAI::morphLarva(Unit* base, BWAPI::UnitType unit) {
+void StarcraftAI::morphLarva(Unit* base, BWAPI::UnitType unit) {
 	int mins = Broodwar->self()->minerals() - reserved_minerals;
 	int supply = Broodwar->self()->supplyTotal() - Broodwar->self()->supplyUsed();
 	Unit* larva = *base->getLarva().begin();
@@ -118,11 +118,11 @@ void BasicAI::morphLarva(Unit* base, BWAPI::UnitType unit) {
 	}
 }
 
-int BasicAI::availableMins() {
+int StarcraftAI::availableMins() {
 	return Broodwar->self()->minerals() - reserved_minerals;
 }
 
-int BasicAI::availableSupply() {
+int StarcraftAI::availableSupply() {
 	return Broodwar->self()->supplyTotal()
 		   - Broodwar->self()->supplyUsed()
 		   + 16 * overlords_building
@@ -130,7 +130,7 @@ int BasicAI::availableSupply() {
 		   - 16 * overlords_destroyed;
 }
 
-void BasicAI::updateSupply() {
+void StarcraftAI::updateSupply() {
 	while ( overlords_finished > 0 &&
 		    overlords_destroyed > 0 ) {
 		overlords_finished--;
@@ -156,7 +156,7 @@ DWORD WINAPI AnalyzeThread()
 	return 0;
 }
 
-void BasicAI::onAnalyze() {
+void StarcraftAI::onAnalyze() {
 	natural = NULL;
 	double best_dist;
 	BWAPI::Position my_pos = BWTA::getStartLocation(Broodwar->self())->getPosition();
@@ -172,7 +172,7 @@ void BasicAI::onAnalyze() {
 	}
 }
 
-void BasicAI::drawVisibilityData()
+void StarcraftAI::drawVisibilityData()
 {
 	for(int x=0;x<Broodwar->mapWidth();x++)
 	{
@@ -191,7 +191,7 @@ void BasicAI::drawVisibilityData()
 	}
 }
 
-void BasicAI::drawTerrainData()
+void StarcraftAI::drawTerrainData()
 {
 	//we will iterate through all the base locations, and draw their outlines.
 	for(std::set<BWTA::BaseLocation*>::const_iterator i=BWTA::getBaseLocations().begin();i!=BWTA::getBaseLocations().end();i++)
@@ -245,50 +245,50 @@ void BasicAI::drawTerrainData()
 	}
 }
 
-void BasicAI::onSendText(std::string text)
+void StarcraftAI::onSendText(std::string text)
 {
 }
 
-void BasicAI::onReceiveText(BWAPI::Player* player, std::string text)
+void StarcraftAI::onReceiveText(BWAPI::Player* player, std::string text)
 {
 }
 
-void BasicAI::onPlayerLeft(BWAPI::Player* player)
+void StarcraftAI::onPlayerLeft(BWAPI::Player* player)
 {
 }
 
-void BasicAI::onNukeDetect(BWAPI::Position target)
+void StarcraftAI::onNukeDetect(BWAPI::Position target)
 {
 }
 
-void BasicAI::onUnitDiscover(BWAPI::Unit* unit)
+void StarcraftAI::onUnitDiscover(BWAPI::Unit* unit)
 {
 }
 
-void BasicAI::onUnitEvade(BWAPI::Unit* unit)
+void StarcraftAI::onUnitEvade(BWAPI::Unit* unit)
 {
 }
 
-void BasicAI::onUnitShow(BWAPI::Unit* unit)
+void StarcraftAI::onUnitShow(BWAPI::Unit* unit)
 {
 }
 
-void BasicAI::onUnitHide(BWAPI::Unit* unit)
+void StarcraftAI::onUnitHide(BWAPI::Unit* unit)
 {
 }
 
-void BasicAI::onUnitCreate(BWAPI::Unit* unit)
+void StarcraftAI::onUnitCreate(BWAPI::Unit* unit)
 {
 }
 
-void BasicAI::onUnitRenegade(BWAPI::Unit* unit)
+void StarcraftAI::onUnitRenegade(BWAPI::Unit* unit)
 {
 }
 
-void BasicAI::onSaveGame(std::string gameName)
+void StarcraftAI::onSaveGame(std::string gameName)
 {
 }
 
-void BasicAI::onUnitComplete(BWAPI::Unit *unit)
+void StarcraftAI::onUnitComplete(BWAPI::Unit *unit)
 {
 }

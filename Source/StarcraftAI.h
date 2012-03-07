@@ -1,5 +1,5 @@
-#ifndef BASICAI_H
-#define BASICAI_H
+#ifndef StarcraftAI_H
+#define StarcraftAI_H
 
 #include <BWAPI.h>
 
@@ -9,7 +9,7 @@
 extern bool analyzed;
 DWORD WINAPI AnalyzeThread();
 
-class BasicAI : public BWAPI::AIModule
+class StarcraftAI : public BWAPI::AIModule
 {
 	BWTA::BaseLocation* natural;
 
