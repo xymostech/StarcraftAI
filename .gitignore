@@ -3,3 +3,5 @@ Products/*
 *.ncb
 *.sln
 *.vcproj.*
+Debug/*
+Release/*
