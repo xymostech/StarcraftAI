@@ -1,2 +1,5 @@
 Products/*
 *.suo
+*.ncb
+*.sln
+*.vcproj.*
