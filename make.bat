@@ -4,6 +4,8 @@ set prodname=StarcraftAI
 
 del /Q Products\*
 
+echo Compiling...
+
 :: Compile source files
 for %%f in ( Source\*.cpp ) do ^
 cl /c /nologo ^
@@ -12,9 +14,11 @@ cl /c /nologo ^
  /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_USRDLL" /D "EXAMPLEAIMODULE_EXPORTS" ^
 			/D "_SECURE_SCL 0" /D "_WINDLL" /D "_UNICODE" /D "UNICODE" ^
  /EHsc /MD /Gy ^
- /FoProducts\ %%f >nul & echo Compiling %%f
+ /FoProducts\ %%f
 
 :: Link the obj files into a dll
+echo Linking to Products\%prodname%.dll
+
 link /nologo ^
  /OUT:Products\%prodname%.dll ^
  /OPT:REF /OPT:ICF /LTCG /NXCOMPAT ^
@@ -25,7 +29,7 @@ link /nologo ^
 		  comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib ^
 		  odbc32.lib odbccp32.lib ^
  Products\*.obj ^
- Resources\embed.manifest.res >nul & echo Linking to Products\%prodname%.dll
+ Resources\embed.manifest.res
 
 :: Copy the dll into the BWAPI AI folder
 copy /Y Products\*.dll "\Program Files (x86)\StarCraft\bwapi-data\AI\" >nul & echo Copying Products\%prodname%.dll to starcraft folder
