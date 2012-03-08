@@ -1,106 +1,7 @@
-
 #include "StarcraftAI.h"
 using namespace BWAPI;
 
 bool analyzed;
-
-void StarcraftAI::onStart()
-{
-	BWTA::readMap();
-	analyzed = false;
-	CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)AnalyzeThread, NULL, 0, NULL);
-	
-	overlords_building = 0;
-	overlords_finished = 0;
-	overlords_destroyed = 0;
-
-	natural_base = NULL;
-	
-	natural = NULL;
-
-	reserved_minerals = 0;
-
-	past_supply = Broodwar->self()->supplyTotal();
-}
-
-void StarcraftAI::onEnd(bool isWinner)
-{
-	
-}
-
-void StarcraftAI::onFrame() {
- 	updateSupply();
-	
-	if ( analyzed ) {
-		onAnalyze();
-		analyzed = false;
-	}
-
-	Unit* u;
-	std::set<Unit*>::const_iterator it, end = Broodwar->self()->getUnits().end();
-
-	for ( it = Broodwar->self()->getUnits().begin(); it != end; ++it ) {
-		u = *it;
-		 if ( u->getType().isWorker() ) {
-			if ( Broodwar->self()->minerals() >= 300 && !natural_base ) {
-				u->build( natural->getTilePosition(), UnitTypes::Zerg_Hatchery );
-				reserved_minerals += 300;
-				natural_base = u;
-			} else if ( u->getOrder() == Orders::PlayerGuard ) {
-				Unit* closestMineral = NULL;
-				int bestDistance = 0;
-				std::set<Unit*>::iterator m_it, m_end = Broodwar->getMinerals().end();
-				for ( m_it = Broodwar->getMinerals().begin(); m_it != m_end; ++m_it ) {
-					if ( closestMineral == NULL || 
-						 u->getDistance( *m_it ) < bestDistance ) {
-						closestMineral = *m_it;
-						bestDistance = u->getDistance(*m_it);
-					}
-				}
-				if ( closestMineral != NULL ) {
-					u->rightClick( closestMineral );
-				}
-			}
-		} else if ( u->getType().isResourceDepot() ) {
-			if(u->getLarva().size() > 0) {
-				if ( availableSupply() <= 2 ) {
-					morphLarva( u, UnitTypes::Zerg_Overlord );
-				} else {
-					morphLarva( u, UnitTypes::Zerg_Drone );
-				}
-			}
-		} else  if ( u->getType() == UnitTypes::Zerg_Overlord ) {
-			if ( natural ) {
-				u->move( natural->getPosition() );
-			}
-		}
-	}
-
-	drawVisibilityData();
-	drawTerrainData();
-}
-
-void StarcraftAI::onUnitMorph(BWAPI::Unit* unit) {
-	if ( unit->getType() == UnitTypes::Zerg_Overlord ) {
-		overlords_building -= 1;
-		overlords_finished += 1;
-		Broodwar->printf("Overlord made");
-	} else if ( unit->getType() == UnitTypes::Zerg_Egg ) {
-		if ( unit->getBuildType() == UnitTypes::Zerg_Overlord ) {
-			Broodwar->printf("Egg morphing into Overlord");
-			overlords_building += 1;
-		}
-	} else if( unit->getType() == UnitTypes::Zerg_Hatchery ) {
-		reserved_minerals -= 300;
-	}
-}
-
-void StarcraftAI::onUnitDestroy(BWAPI::Unit* unit)
-{
-	if ( unit->getType() == UnitTypes::Zerg_Overlord ) {
-		overlords_destroyed += 1;
-	}
-}
 
 void StarcraftAI::morphLarva(Unit* base, BWAPI::UnitType unit) {
 	int mins = Broodwar->self()->minerals() - reserved_minerals;
@@ -125,35 +26,27 @@ int StarcraftAI::availableMins() {
 int StarcraftAI::availableSupply() {
 	return Broodwar->self()->supplyTotal()
 		   - Broodwar->self()->supplyUsed()
-		   + 16 * overlords_building
-		   + 16 * overlords_finished
-		   - 16 * overlords_destroyed;
+		   + 16 * supply_building
+		   + 16 * supply_finished
+		   - 16 * supply_destroyed;
 }
 
 void StarcraftAI::updateSupply() {
-	while ( overlords_finished > 0 &&
-		    overlords_destroyed > 0 ) {
-		overlords_finished--;
-		overlords_destroyed--;
+	while ( supply_finished > 0 &&
+		    supply_destroyed > 0 ) {
+		supply_finished--;
+		supply_destroyed--;
 	}
 
 	int supply = Broodwar->self()->supplyTotal();
 
 	if ( supply < past_supply ) {
-		overlords_destroyed -= (past_supply - supply) / 16;
+		supply_destroyed -= (past_supply - supply) / 16;
 	} else if ( supply > past_supply ) {
-		overlords_finished -= (supply - past_supply) / 16;
+		supply_finished -= (supply - past_supply) / 16;
 	}
 
 	past_supply = supply;
-}
-
-DWORD WINAPI AnalyzeThread()
-{
-	BWTA::analyze();
-
-	analyzed = true;
-	return 0;
 }
 
 void StarcraftAI::onAnalyze() {
@@ -245,6 +138,101 @@ void StarcraftAI::drawTerrainData()
 	}
 }
 
+void StarcraftAI::onStart()
+{
+	BWTA::readMap();
+	analyzed = false;
+	CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)AnalyzeThread, NULL, 0, NULL);
+	
+	supply_building = 0;
+	supply_finished = 0;
+	supply_destroyed = 0;
+
+	natural_base = NULL;
+	
+	natural = NULL;
+
+	reserved_minerals = 0;
+
+	past_supply = Broodwar->self()->supplyTotal();
+}
+
+void StarcraftAI::onEnd(bool isWinner)
+{
+}
+
+void StarcraftAI::onFrame() {
+ 	updateSupply();
+	
+	if ( analyzed ) {
+		onAnalyze();
+		analyzed = false;
+	}
+
+	Unit* u;
+	std::set<Unit*>::const_iterator it, end = Broodwar->self()->getUnits().end();
+
+	for ( it = Broodwar->self()->getUnits().begin(); it != end; ++it ) {
+		u = *it;
+		 if ( u->getType().isWorker() ) {
+			if ( Broodwar->self()->minerals() >= 300 && !natural_base ) {
+				u->build( natural->getTilePosition(), UnitTypes::Zerg_Hatchery );
+				reserved_minerals += 300;
+				natural_base = u;
+			} else if ( u->getOrder() == Orders::PlayerGuard ) {
+				Unit* closestMineral = NULL;
+				int bestDistance = 0;
+				std::set<Unit*>::iterator m_it, m_end = Broodwar->getMinerals().end();
+				for ( m_it = Broodwar->getMinerals().begin(); m_it != m_end; ++m_it ) {
+					if ( closestMineral == NULL || 
+						 u->getDistance( *m_it ) < bestDistance ) {
+						closestMineral = *m_it;
+						bestDistance = u->getDistance(*m_it);
+					}
+				}
+				if ( closestMineral != NULL ) {
+					u->rightClick( closestMineral );
+				}
+			}
+		} else if ( u->getType().isResourceDepot() ) {
+			if(u->getLarva().size() > 0) {
+				if ( availableSupply() <= 2 ) {
+					morphLarva( u, UnitTypes::Zerg_Overlord );
+				} else {
+					morphLarva( u, UnitTypes::Zerg_Drone );
+				}
+			}
+		} else  if ( u->getType() == UnitTypes::Zerg_Overlord ) {
+			if ( natural ) {
+				u->move( natural->getPosition() );
+			}
+		}
+	}
+
+	drawVisibilityData();
+	drawTerrainData();
+}
+
+void StarcraftAI::onUnitMorph(BWAPI::Unit* unit) {
+	if ( unit->getType() == UnitTypes::Zerg_Overlord ) {
+		supply_building -= 1;
+		supply_finished += 1;
+	} else if ( unit->getType() == UnitTypes::Zerg_Egg ) {
+		if ( unit->getBuildType() == UnitTypes::Zerg_Overlord ) {
+			supply_building += 1;
+		}
+	} else if( unit->getType() == UnitTypes::Zerg_Hatchery ) {
+		reserved_minerals -= 300;
+	}
+}
+
+void StarcraftAI::onUnitDestroy(BWAPI::Unit* unit)
+{
+	if ( unit->getType() == UnitTypes::Zerg_Overlord ) {
+		supply_destroyed += 1;
+	}
+}
+
 void StarcraftAI::onSendText(std::string text)
 {
 }
@@ -291,4 +279,12 @@ void StarcraftAI::onSaveGame(std::string gameName)
 
 void StarcraftAI::onUnitComplete(BWAPI::Unit *unit)
 {
+}
+
+DWORD WINAPI AnalyzeThread()
+{
+	BWTA::analyze();
+
+	analyzed = true;
+	return 0;
 }

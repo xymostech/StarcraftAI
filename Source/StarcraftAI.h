@@ -1,28 +1,31 @@
-#ifndef StarcraftAI_H
-#define StarcraftAI_H
+#ifndef STARCRAFTAI_H
+#define STARCRAFTAI_H
 
 #include <BWAPI.h>
 
 #include <BWTA.h>
 #include <windows.h>
 
-extern bool analyzed;
 DWORD WINAPI AnalyzeThread();
 
 class StarcraftAI : public BWAPI::AIModule
 {
 	BWTA::BaseLocation* natural;
+	BWAPI::Unit *main_base, *natural_base;
 
-	BWAPI::Unit* main_base;
-	BWAPI::Unit* natural_base;
-
-	int overlords_building;
-	int overlords_finished;
-	int overlords_destroyed;
-
+	int supply_building, supply_finished, supply_destroyed, past_supply;
 	int reserved_minerals;
+	
+	void morphLarva(BWAPI::Unit* base, BWAPI::UnitType unit);
 
-	int past_supply;
+	int availableMins();
+	int availableSupply();
+	void updateSupply();
+
+	void onAnalyze();
+
+	void drawVisibilityData();
+	void drawTerrainData();
 public:
 	virtual void onStart();
 	virtual void onEnd(bool isWinner);
@@ -41,17 +44,6 @@ public:
 	virtual void onUnitRenegade(BWAPI::Unit* unit);
 	virtual void onSaveGame(std::string gameName);
 	virtual void onUnitComplete(BWAPI::Unit *unit);
-
-	void morphLarva(BWAPI::Unit* base, BWAPI::UnitType unit);
-
-	int availableMins();
-	int availableSupply();
-	void updateSupply();
-
-	void onAnalyze();
-
-	void drawVisibilityData();
-	void drawTerrainData();
 };
 
 #endif
