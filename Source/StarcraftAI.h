@@ -11,7 +11,9 @@ DWORD WINAPI AnalyzeThread();
 class StarcraftAI : public BWAPI::AIModule
 {
 	BWTA::BaseLocation* natural;
-	BWAPI::Unit *main_base, *natural_base;
+	BWAPI::Unit *main_base, *natural_base, *spawning_pool;
+	
+	BWAPI::TilePosition pool_pos;
 
 	int supply_building, supply_finished, supply_destroyed, past_supply;
 	int reserved_minerals;
