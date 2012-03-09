@@ -27,7 +27,7 @@ link /nologo ^
           ../lib/libboost_thread-vc90-mt-1_40.lib ../lib/gmp-vc90-mt.lib ^
 		  ../lib/mpfr-vc90-mt.lib kernel32.lib user32.lib gdi32.lib winspool.lib ^
 		  comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib ^
-		  odbc32.lib odbccp32.lib ^
+		  odbc32.lib odbccp32.lib /NODEFAULTLIB:LIBCMT^
  Products\*.obj ^
  Resources\embed.manifest.res
 
